@@ -1,6 +1,6 @@
 namespace EFCache.Sharding
 {
-	public interface IShardManager
+	public interface IShardedCache
 	{
 		ICache GetShard(string databaseName);
 	}

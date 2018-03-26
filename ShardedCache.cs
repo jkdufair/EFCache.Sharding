@@ -5,7 +5,7 @@ using System.Data.Common;
 
 namespace EFCache.Sharding
 {
-	public class ShardManager : ICache, IShardManager
+	public class ShardedCache : ICache, IShardedCache
 	{
 		private static readonly ConcurrentDictionary<string, ICache> Shards = new ConcurrentDictionary<string, ICache>();
 		private static readonly ConcurrentDictionary<string, string> DatabaseCacheMap = new ConcurrentDictionary<string, string>();
@@ -13,7 +13,7 @@ namespace EFCache.Sharding
 		private readonly ICacheConfigurationProvider _cacheConfigurationProvider;
 		private readonly ICacheFactory _cacheFactory;
 
-		public ShardManager(ICacheConfigurationProvider cacheConfigurationProvider, ICacheFactory cacheFactory)
+		public ShardedCache(ICacheConfigurationProvider cacheConfigurationProvider, ICacheFactory cacheFactory)
 		{
 			_cacheConfigurationProvider = cacheConfigurationProvider;
 			_cacheFactory = cacheFactory;
