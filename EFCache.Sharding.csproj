@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EFCache\EFCache\EFCache.csproj" />
+    <ProjectReference Include="..\StudioKit.Encryption\StudioKit.Encryption.csproj" />
   </ItemGroup>
 
 </Project>

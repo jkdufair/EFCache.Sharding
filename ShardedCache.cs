@@ -1,55 +1,56 @@
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data.Common;
 
 namespace EFCache.Sharding
 {
     public class ShardedCache : ICache
     {
-        private readonly Func<string, string> _cacheConnectionStringProvider;
-        private readonly Func<string, ICache> _cacheFactory;
+        private static readonly ConcurrentDictionary<string, ICache> Shards = new ConcurrentDictionary<string, ICache>();
+        private static readonly ConcurrentDictionary<string, string> DatabaseCacheMap = new ConcurrentDictionary<string, string>();
 
-        public ShardedCache(Func<string, string> cacheConnectionStringProvider, Func<string, ICache> cacheFactory)
+        private readonly ICacheConfigurationProvider _cacheConfigurationProvider;
+        private readonly ICacheFactory _cacheFactory;
+
+        public ShardedCache(ICacheConfigurationProvider cacheConfigurationProvider, ICacheFactory cacheFactory)
         {
-            _cacheConnectionStringProvider = cacheConnectionStringProvider;
+            _cacheConfigurationProvider = cacheConfigurationProvider;
             _cacheFactory = cacheFactory;
         }
 
-        private readonly ConcurrentDictionary<string, ICache> _shards = new ConcurrentDictionary<string, ICache>();
-        private readonly ConcurrentDictionary<string, string> _databaseCacheMap = new ConcurrentDictionary<string, string>();
-
-        public bool GetItem(string key, out object value, string backingDatabaseName)
+        public bool GetItem(string key, out object value, DbConnection backingConnection)
         {
-            EnsureShard(backingDatabaseName);
-            return _shards[backingDatabaseName].GetItem(key, out value);
+            EnsureShard(backingConnection);
+            return Shards[backingConnection.Database].GetItem(key, out value);
         }
 
-        public void PutItem(string key, object value, IEnumerable<string> dependentEntitySets, TimeSpan slidingExpiration,
-            DateTimeOffset absoluteExpiration, string backingDatabaseName)
+        public void PutItem(string key, object value, IEnumerable<string> dependentEntitySets, TimeSpan slidingExpiration, DateTimeOffset absoluteExpiration, DbConnection backingConnection)
         {
-            EnsureShard(backingDatabaseName);
-            _shards[backingDatabaseName].PutItem(key, value, dependentEntitySets, slidingExpiration, absoluteExpiration);
+            EnsureShard(backingConnection);
+            Shards[backingConnection.Database].PutItem(key, value, dependentEntitySets, slidingExpiration, absoluteExpiration);
         }
 
-        public void InvalidateSets(IEnumerable<string> entitySets, string backingDatabaseName)
+        public void InvalidateSets(IEnumerable<string> entitySets, DbConnection backingConnection)
         {
-            EnsureShard(backingDatabaseName);
-            _shards[backingDatabaseName].InvalidateSets(entitySets);
+            EnsureShard(backingConnection);
+            Shards[backingConnection.Database].InvalidateSets(entitySets);
         }
 
-        public void InvalidateItem(string key, string backingDatabaseName)
+        public void InvalidateItem(string key, DbConnection backingConnection)
         {
-            EnsureShard(backingDatabaseName);
-            _shards[backingDatabaseName].InvalidateItem(key);
+            EnsureShard(backingConnection);
+            Shards[backingConnection.Database].InvalidateItem(key);
         }
 
-        private void EnsureShard(string backingDatabaseName)
+        private void EnsureShard(DbConnection backingConnection)
         {
-            if (_databaseCacheMap.ContainsKey(backingDatabaseName)) return;
-            var connectionString = _cacheConnectionStringProvider(backingDatabaseName);
-            // we don't check the results since we know the keys do not exist
-            _databaseCacheMap.TryAdd(backingDatabaseName, connectionString);
-            _shards.TryAdd(backingDatabaseName, _cacheFactory(connectionString));
+            if (DatabaseCacheMap.ContainsKey(backingConnection.Database)) return;
+            var (connectionString, shouldCollectStatistics) = _cacheConfigurationProvider.GetConfiguration(backingConnection);
+            // we don't check the results of TryAdd since we know the keys do not exist
+            DatabaseCacheMap.TryAdd(backingConnection.Database, connectionString);
+            Shards.TryAdd(backingConnection.Database, _cacheFactory.CreateCache(connectionString, shouldCollectStatistics));
         }
     }
 }
