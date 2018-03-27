@@ -4,6 +4,6 @@ namespace EFCache.Sharding
 {
 	public interface ICacheConfigurationProvider
 	{
-		(string, bool) GetConfiguration(DbConnection backingConnection);
+		RedisShardConfiguration GetConfiguration(DbConnection backingConnection);
 	}
 }

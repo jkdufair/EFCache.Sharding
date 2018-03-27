@@ -37,6 +37,7 @@
     <Compile Include="ICacheFactory.cs" />
     <Compile Include="IShardedCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RedisShardConfiguration.cs" />
     <Compile Include="ShardedCache.cs" />
   </ItemGroup>
   <ItemGroup>

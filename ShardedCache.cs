@@ -5,7 +5,7 @@ using System.Data.Common;
 
 namespace EFCache.Sharding
 {
-	public class ShardedCache : ICache, IShardedCache
+	public class ShardedCache : IShardedCache
 	{
 		private static readonly ConcurrentDictionary<string, ICache> Shards = new ConcurrentDictionary<string, ICache>();
 		private static readonly ConcurrentDictionary<string, string> DatabaseCacheMap = new ConcurrentDictionary<string, string>();
@@ -51,10 +51,10 @@ namespace EFCache.Sharding
 		private void EnsureShard(DbConnection backingConnection)
 		{
 			if (DatabaseCacheMap.ContainsKey(backingConnection.Database)) return;
-			var (connectionString, shouldCollectStatistics) = _cacheConfigurationProvider.GetConfiguration(backingConnection);
+			var config = _cacheConfigurationProvider.GetConfiguration(backingConnection);
 			// we don't check the results of TryAdd since we know the keys do not exist
-			DatabaseCacheMap.TryAdd(backingConnection.Database, connectionString);
-			Shards.TryAdd(backingConnection.Database, _cacheFactory.CreateCache(connectionString, shouldCollectStatistics));
+			DatabaseCacheMap.TryAdd(backingConnection.Database, config.ConnectionString);
+			Shards.TryAdd(backingConnection.Database, _cacheFactory.CreateCache(config.ConnectionString, config.ShouldCollectStatistics));
 		}
 	}
 }
