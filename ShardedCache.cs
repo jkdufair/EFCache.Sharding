@@ -13,6 +13,8 @@ namespace EFCache.Sharding
 		private readonly ICacheConfigurationProvider _cacheConfigurationProvider;
 		private readonly ICacheFactory _cacheFactory;
 
+		public static bool ShouldBypass { get; set; } = false;
+
 		public ShardedCache(ICacheConfigurationProvider cacheConfigurationProvider, ICacheFactory cacheFactory)
 		{
 			_cacheConfigurationProvider = cacheConfigurationProvider;
@@ -21,31 +23,39 @@ namespace EFCache.Sharding
 
 		public bool GetItem(string key, out object value, DbConnection backingConnection)
 		{
+			if (ShouldBypass)
+			{
+				value = null;
+				return false;
+			}
 			EnsureShard(backingConnection);
 			return Shards[backingConnection.Database].GetItem(key, out value);
 		}
 
 		public void PutItem(string key, object value, IEnumerable<string> dependentEntitySets, TimeSpan slidingExpiration, DateTimeOffset absoluteExpiration, DbConnection backingConnection)
 		{
+			if (ShouldBypass) return;
 			EnsureShard(backingConnection);
 			Shards[backingConnection.Database].PutItem(key, value, dependentEntitySets, slidingExpiration, absoluteExpiration);
 		}
 
 		public void InvalidateSets(IEnumerable<string> entitySets, DbConnection backingConnection)
 		{
+			if (ShouldBypass) return;
 			EnsureShard(backingConnection);
 			Shards[backingConnection.Database].InvalidateSets(entitySets);
 		}
 
 		public void InvalidateItem(string key, DbConnection backingConnection)
 		{
+			if (ShouldBypass) return;
 			EnsureShard(backingConnection);
 			Shards[backingConnection.Database].InvalidateItem(key);
 		}
 
 		public ICache GetShard(string databaseName)
 		{
-			return Shards[databaseName];
+			return ShouldBypass ? null : Shards[databaseName];
 		}
 
 		private void EnsureShard(DbConnection backingConnection)
