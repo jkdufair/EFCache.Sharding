@@ -13,15 +13,6 @@ namespace EFCache.Sharding
 		private static Lazy<Dictionary<string, ICache>> _shards;
 
 		/// <summary>
-		/// Implemented for compatibility purposes
-		/// </summary>
-		/// <param name="cache"></param>
-		public ShardedCacheTransactionHandler(ICache cache) : base(cache)
-		{
-			throw new NotImplementedException();
-		}
-
-		/// <summary>
 		/// Accepts a lazy dictionary mapping database names to instances of implementations of
 		/// ICache
 		/// </summary>
@@ -33,35 +24,9 @@ namespace EFCache.Sharding
 
 		public static bool ShouldBypass { get; set; } = false;
 
-		public bool GetItem(DbTransaction transaction, string key, out object value, string databaseName)
+		protected override ICache ResolveCache(DbConnection dbConnection)
 		{
-			if (ShouldBypass)
-			{
-				value = null;
-				return false;
-			}
-
-			return _shards.Value[databaseName].GetItem(key, out value);
-		}
-
-		public void PutItem(DbTransaction transaction, string key, object value,
-			IEnumerable<string> dependentEntitySets,
-			TimeSpan slidingExpiration, DateTimeOffset absoluteExpiration, string databaseName)
-		{
-			if (ShouldBypass) return;
-			_shards.Value[databaseName].PutItem(key, value, dependentEntitySets, slidingExpiration, absoluteExpiration);
-		}
-
-		public void InvalidateSets(DbTransaction transaction, IEnumerable<string> entitySets,
-			string databaseName)
-		{
-			if (ShouldBypass) return;
-			_shards.Value[databaseName].InvalidateSets(entitySets);
-		}
-
-		public ICache GetShard(string databaseName)
-		{
-			return ShouldBypass ? null : _shards.Value[databaseName];
+			return ShouldBypass ? null : _shards.Value[dbConnection.Database];
 		}
 	}
 }
