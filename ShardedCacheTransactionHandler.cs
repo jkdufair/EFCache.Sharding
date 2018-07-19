@@ -22,11 +22,9 @@ namespace EFCache.Sharding
 			_shards = shards;
 		}
 
-		public static bool ShouldBypass { get; set; } = false;
-
 		protected override ICache ResolveCache(DbConnection dbConnection)
 		{
-			return ShouldBypass ? null : _shards.Value[dbConnection.Database];
+			return _shards.Value[dbConnection.Database];
 		}
 	}
 }
