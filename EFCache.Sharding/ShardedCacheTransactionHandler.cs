@@ -10,7 +10,7 @@ namespace EFCache.Sharding
 	/// </summary>
 	public class ShardedCacheTransactionHandler : CacheTransactionHandler
 	{
-		private static Lazy<Dictionary<string, ICache>> _shards;
+		protected static Lazy<Dictionary<string, ICache>> Shards;
 
 		/// <summary>
 		/// Accepts a lazy dictionary mapping database names to instances of implementations of
@@ -19,12 +19,12 @@ namespace EFCache.Sharding
 		/// <param name="shards"></param>
 		public ShardedCacheTransactionHandler(Lazy<Dictionary<string, ICache>> shards)
 		{
-			_shards = shards;
+			Shards = shards;
 		}
 
 		protected override ICache ResolveCache(DbConnection dbConnection)
 		{
-			return _shards.Value[dbConnection.Database];
+			return Shards.Value[dbConnection.Database];
 		}
 	}
 }
