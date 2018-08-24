@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.Azure.SqlDatabase.ElasticScale.ShardManagement;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace EFCache.Sharding.Tests
 		{
 			const string databaseName = "some-database";
 			var applicationCache = new NullCache();
-			var result = ShardedCacheConfigurator.CreateShardDictionary(exception => { }, () => new List<string> { databaseName },
+			var result = ShardedCacheConfigurator.CreateShardDictionary(exception => { }, () => new List<Shard> { },
 				(shard, handler) => applicationCache).Value;
 			var expectedResult = new Lazy<Dictionary<string, ICache>>();
 			expectedResult.Value[databaseName] = applicationCache;
@@ -29,7 +30,7 @@ namespace EFCache.Sharding.Tests
 		{
 			const string databaseName = "some-database";
 			var applicationCache = new NullCache();
-			var result = ShardedCacheConfigurator.CreateShardDictionary(null, () => new List<string> { databaseName },
+			var result = ShardedCacheConfigurator.CreateShardDictionary(null, () => new List<Shard> { },
 				(shard, handler) => applicationCache).Value;
 			var expectedResult = new Lazy<Dictionary<string, ICache>>();
 			expectedResult.Value[databaseName] = applicationCache;
@@ -52,8 +53,7 @@ namespace EFCache.Sharding.Tests
 		[TestMethod]
 		public void CreateShardDictionary_ShouldThrowWithoutCacheFactory()
 		{
-			const string databaseName = "some-database";
-			var result = ShardedCacheConfigurator.CreateShardDictionary(null, () => new List<string> { databaseName },
+			var result = ShardedCacheConfigurator.CreateShardDictionary(null, () => new List<Shard> { },
 				null).Value;
 		}
 	}
