@@ -1,5 +1,4 @@
-﻿using Microsoft.Azure.SqlDatabase.ElasticScale.ShardManagement;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace EFCache.Sharding
@@ -12,22 +11,22 @@ namespace EFCache.Sharding
 		/// can't have had EF already initialized.
 		/// </summary>
 		/// <param name="handleError">The error handling function to get passed on to the shard's cache construction process</param>
-		/// <param name="getConfiguredShards">Function that can be called to get a list of <see cref="Microsoft.Azure.SqlDatabase.ElasticScale.ShardManagement.Shard" /> objects configured
+		/// <param name="getConfiguredDatabases">Function that can be called to get a list of <see cref="Microsoft.Azure.SqlDatabase.ElasticScale.ShardManagement.Shard" /> objects configured
 		/// for the application</param>
 		/// <param name="cacheFactory">Factory method for creating an <see cref="ICache" /> instance, given a <see cref="Microsoft.Azure.SqlDatabase.ElasticScale.ShardManagement.Shard" /> and an
 		/// func to call when there are caching exceptions</param>
 		/// <returns>A dictionary representing a map from database names to <see cref="ICache"/> instances</returns>
 		public static Lazy<Dictionary<string, ICache>> CreateShardDictionary(Action<Exception> handleError,
-			Func<IEnumerable<Shard>> getConfiguredShards, Func<Shard, Action<Exception>, ICache> cacheFactory)
+			Func<IEnumerable<string>> getConfiguredDatabases, Func<string, Action<Exception>, ICache> cacheFactory)
 		{
 			return new Lazy<Dictionary<string, ICache>>(() =>
 			{
-				var shards = getConfiguredShards();
+				var databases = getConfiguredDatabases();
 				var shardDict = new Dictionary<string, ICache>();
-				foreach (var shard in shards)
+				foreach (var database in databases)
 				{
-					var cache = cacheFactory(shard, handleError);
-					shardDict[shard.Location.Database] = cache;
+					var cache = cacheFactory(database, handleError);
+					shardDict[database] = cache;
 				}
 
 				return shardDict;

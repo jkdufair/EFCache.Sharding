@@ -76,6 +76,7 @@
     <Compile Include="ShardedCacheTransactionHandlerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="NullCacheTests.cs" />
+    <Compile Include="ShardedCacheConfiguratorTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
