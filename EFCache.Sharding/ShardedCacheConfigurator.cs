@@ -1,5 +1,4 @@
-﻿using Microsoft.Azure.SqlDatabase.ElasticScale.ShardManagement;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace EFCache.Sharding
@@ -18,16 +17,16 @@ namespace EFCache.Sharding
 		/// func to call when there are caching exceptions</param>
 		/// <returns>A dictionary representing a map from database names to <see cref="ICache"/> instances</returns>
 		public static Lazy<Dictionary<string, ICache>> CreateShardDictionary(Action<Exception> handleError,
-			Func<IEnumerable<Shard>> getConfiguredShards, Func<Shard, Action<Exception>, ICache> cacheFactory)
+			Func<IEnumerable<ShardLocation>> getConfiguredShards, Func<ShardLocation, Action<Exception>, ICache> cacheFactory)
 		{
 			return new Lazy<Dictionary<string, ICache>>(() =>
 			{
-				var shards = getConfiguredShards();
+				var shardLocations = getConfiguredShards();
 				var shardDict = new Dictionary<string, ICache>();
-				foreach (var shard in shards)
+				foreach (var shardLocation in shardLocations)
 				{
-					var cache = cacheFactory(shard, handleError);
-					shardDict[shard.Location.Database] = cache;
+					var cache = cacheFactory(shardLocation, handleError);
+					shardDict[shardLocation.Database] = cache;
 				}
 
 				return shardDict;
