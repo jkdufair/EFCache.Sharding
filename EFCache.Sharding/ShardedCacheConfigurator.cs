@@ -16,8 +16,8 @@ namespace EFCache.Sharding
 		/// <param name="cacheFactory">Factory method for creating an <see cref="ICache" /> instance, given a <see cref="Microsoft.Azure.SqlDatabase.ElasticScale.ShardManagement.Shard" /> and an
 		/// func to call when there are caching exceptions</param>
 		/// <returns>A dictionary representing a map from database names to <see cref="ICache"/> instances</returns>
-		public static Lazy<Dictionary<string, ICache>> CreateShardDictionary(Action<Exception> handleError,
-			Func<IEnumerable<ShardLocation>> getConfiguredShards, Func<ShardLocation, Action<Exception>, ICache> cacheFactory)
+		public static Lazy<Dictionary<string, ICache>> CreateShardDictionary(Func<IEnumerable<ShardLocation>> getConfiguredShards,
+			Func<ShardLocation, Action<Exception>, ICache> cacheFactory, Action<Exception> handleError)
 		{
 			return new Lazy<Dictionary<string, ICache>>(() =>
 			{
