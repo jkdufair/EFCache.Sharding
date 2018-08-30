@@ -13,9 +13,8 @@ namespace EFCache.Sharding.Tests
 		{
 			const string databaseName = "some-database";
 			var applicationCache = new NullCache();
-			var result = ShardedCacheConfigurator.CreateShardDictionary(exception => { },
-				() => new List<ShardLocation> { new ShardLocation { Database = databaseName, Server = "unused-in-tests" } },
-				(shard, handler) => applicationCache).Value;
+			var result = ShardedCacheConfigurator.CreateShardDictionary(() => new List<ShardLocation> { new ShardLocation { Database = databaseName, Server = "unused-in-tests" } },
+				(shard, handler) => applicationCache, exception => { }).Value;
 			var expectedResult = new Lazy<Dictionary<string, ICache>>();
 			expectedResult.Value[databaseName] = applicationCache;
 			var someOtherCache = new NullCache();
@@ -30,9 +29,8 @@ namespace EFCache.Sharding.Tests
 		{
 			const string databaseName = "some-database";
 			var applicationCache = new NullCache();
-			var result = ShardedCacheConfigurator.CreateShardDictionary(null,
-				() => new List<ShardLocation> { new ShardLocation { Database = databaseName, Server = "unused-in-tests" } },
-				(shard, handler) => applicationCache).Value;
+			var result = ShardedCacheConfigurator.CreateShardDictionary(() => new List<ShardLocation> { new ShardLocation { Database = databaseName, Server = "unused-in-tests" } },
+				(shard, handler) => applicationCache, null).Value;
 			var expectedResult = new Lazy<Dictionary<string, ICache>>();
 			expectedResult.Value[databaseName] = applicationCache;
 			var someOtherCache = new NullCache();
@@ -47,15 +45,14 @@ namespace EFCache.Sharding.Tests
 		public void CreateShardDictionary_ShouldThrowWithoutDatabases()
 		{
 			var applicationCache = new NullCache();
-			var result = ShardedCacheConfigurator.CreateShardDictionary(null, null, (shard, handler) => applicationCache).Value;
+			var result = ShardedCacheConfigurator.CreateShardDictionary(null, (shard, handler) => applicationCache, null).Value;
 		}
 
 		[ExpectedException(typeof(NullReferenceException))]
 		[TestMethod]
 		public void CreateShardDictionary_ShouldThrowWithoutCacheFactory()
 		{
-			var result = ShardedCacheConfigurator.CreateShardDictionary(null,
-				() => new List<ShardLocation> { new ShardLocation { Database = "unused", Server = "unused-in-tests" } }, null).Value;
+			var result = ShardedCacheConfigurator.CreateShardDictionary(() => new List<ShardLocation> { new ShardLocation { Database = "unused", Server = "unused-in-tests" } }, null, null).Value;
 		}
 	}
 }
