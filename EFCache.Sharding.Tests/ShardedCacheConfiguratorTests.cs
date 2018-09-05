@@ -18,10 +18,10 @@ namespace EFCache.Sharding.Tests
 			var expectedResult = new Lazy<Dictionary<string, ICache>>();
 			expectedResult.Value[databaseName] = applicationCache;
 			var someOtherCache = new NullCache();
-			Assert.AreEqual(result.Keys.Count, 1);
-			Assert.AreEqual(result.Keys.ElementAt(0), databaseName);
-			Assert.AreSame(result.Values.ElementAt(0), applicationCache);
-			Assert.AreNotSame(result.Values.ElementAt(0), someOtherCache);
+			Assert.AreEqual(1, result.Keys.Count);
+			Assert.AreEqual(databaseName, result.Keys.ElementAt(0));
+			Assert.AreSame(applicationCache, result.Values.ElementAt(0));
+			Assert.AreNotSame(someOtherCache, result.Values.ElementAt(0));
 		}
 
 		[TestMethod]
@@ -34,10 +34,10 @@ namespace EFCache.Sharding.Tests
 			var expectedResult = new Lazy<Dictionary<string, ICache>>();
 			expectedResult.Value[databaseName] = applicationCache;
 			var someOtherCache = new NullCache();
-			Assert.AreEqual(result.Keys.Count, 1);
-			Assert.AreEqual(result.Keys.ElementAt(0), databaseName);
-			Assert.AreSame(result.Values.ElementAt(0), applicationCache);
-			Assert.AreNotSame(result.Values.ElementAt(0), someOtherCache);
+			Assert.AreEqual(1, result.Keys.Count);
+			Assert.AreEqual(databaseName, result.Keys.ElementAt(0));
+			Assert.AreSame(applicationCache, result.Values.ElementAt(0));
+			Assert.AreNotSame(someOtherCache, result.Values.ElementAt(0));
 		}
 
 		[ExpectedException(typeof(NullReferenceException))]
