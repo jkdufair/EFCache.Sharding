@@ -33,7 +33,7 @@ namespace EFCache.Sharding.Tests
 		[TestMethod]
 		public void ShardedCacheTransactionHandler_ShouldThrowIfDictionaryEmpty()
 		{
-			const string dbName = "some-database";
+			const string dbName = "some-other-database";
 
 			var dbConnectionMock = new Mock<DbConnection>();
 			dbConnectionMock.Setup(conn => conn.Database).Returns(dbName);
