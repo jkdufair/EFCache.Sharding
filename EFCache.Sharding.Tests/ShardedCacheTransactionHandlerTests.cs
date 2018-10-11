@@ -7,6 +7,7 @@ using System.Data.Common;
 namespace EFCache.Sharding.Tests
 {
 	[TestClass]
+	[DoNotParallelize]
 	public class ShardedCacheTransactionHandlerTests
 	{
 		[TestMethod]
